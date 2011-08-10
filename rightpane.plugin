@@ -6,3 +6,4 @@ Name=Right Pane
 Description=Display a right pane & manage it
 Authors=Tournier Guillaume <tournier.guillaume@gmail.com>
 Copyright=Copyright © 2009 Tournier Guillaume <tournier.guillaume@gmail.com>
+Website=http://github.com/aniav/gedit-rightpane-plugin

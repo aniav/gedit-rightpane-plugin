@@ -11,7 +11,7 @@
 # GNU General Public License for more details.
 
 
-import gedit, gtk
+from gi.repository import GObject, Gtk, Gedit
 import os, os.path, ConfigParser
 
 ui_str="""<ui>
@@ -30,11 +30,10 @@ DEFAULT_WIDTH = 200
 PREFS_PATH = os.path.dirname(__file__) + '/rightpane-prefs'
 
 class RightPanePluginInstance:
-	def __init__(self, plugin, window):
+	def __init__(self, window):
 		self.window = window
-		self.plugin = plugin
 		self.popup = None
-		self.popup_tab_list = gtk.VBox()
+		self.popup_tab_list = Gtk.VBox()
 		# Read preferences
 		self.config = ConfigParser.ConfigParser()
 		self.read_prefs()
@@ -48,11 +47,11 @@ class RightPanePluginInstance:
 		# gedit elements
 		self.gbox = self.window.get_child()
 		self.old_hpaned = self.gbox.get_children()[2]
-		self.new_hpaned = gtk.HPaned()
+		self.new_hpaned = Gtk.HPaned()
 		self.left_pane = self.old_hpaned.get_child1()
 		self.left_head = self.left_pane.get_children()[0]
 		self.left_notebook = self.left_pane.get_children()[1]
-		self.right_pane = gedit.Panel()
+		self.right_pane = Gedit.Panel()
 		self.view_menu = self.gbox.get_children()[0].get_children()[2].get_submenu()
 		# Insert the menu + right pane
 		self.insert_menu()
@@ -171,7 +170,7 @@ class RightPanePluginInstance:
 		self.config.set('left_pane', 'visible', str(chk.get_active()))
 
 	# Plugin deactivation
-	def deactivate(self):
+	def do_deactivate(self):
 		if False == self.delete:
 			if self.show:
 				self.on_gedit_delete()
@@ -181,7 +180,6 @@ class RightPanePluginInstance:
 #		self.action_group = None # Ugly but can cause a seg fault...
 		self.window = None
 		self.popup = None
-		self.plugin = None
 
 	# Transfer all right tabs to the left pane & destroy the right pane
 	def destroy_right_pane(self):
@@ -195,17 +193,17 @@ class RightPanePluginInstance:
 		self.gbox.remove(self.new_hpaned)
 		self.gbox.add(self.old_hpaned)
 
-	def update_ui(self):
+	def do_update_state(self):
 		return
 
 	# Insert right pane items in view menu
 	def insert_menu(self):
 		manager = self.window.get_ui_manager()
-		self.action_group = gtk.ActionGroup("RightPaneActionGroup1")
-		rightpane_action = gtk.ToggleAction(name="ViewRightSidePane", label="Right Side Pane", tooltip="Right Pane", stock_id=None)
+		self.action_group = Gtk.ActionGroup("RightPaneActionGroup1")
+		rightpane_action = Gtk.ToggleAction(name="ViewRightSidePane", label="Right Side Pane", tooltip="Right Pane", stock_id=None)
 		rightpane_action.connect("activate", lambda a: self.display_right_pane())
 		self.action_group.add_toggle_actions([("ViewRightSidePane", None, _("Right Side Pane"), "<Ctrl>F8", _("Right Pane"), self.display_right_pane) ])
-		managerightpane_action = gtk.Action(name="ManageRightSidePane", label="Manage Left & Right Panes", tooltip="Left & Right Pane Manager", stock_id=None)
+		managerightpane_action = Gtk.Action(name="ManageRightSidePane", label="Manage Left & Right Panes", tooltip="Left & Right Pane Manager", stock_id=None)
 		managerightpane_action.connect("activate", lambda a: self.display_popup())
 		self.action_group.add_action_with_accel(managerightpane_action, "<Ctrl>F10")
 		manager.insert_action_group(self.action_group, -1)
@@ -276,17 +274,17 @@ class RightPanePluginInstance:
 
 	# Build popup elements
 	def build_popup(self):
-		self.popup = gtk.Window(type=gtk.WINDOW_TOPLEVEL)
+		self.popup = Gtk.Window(type=Gtk.WINDOW_TOPLEVEL)
 		self.popup.set_title("Left-Right Pane Manager (Ctrl+F10)")
-		self.popup.set_position(gtk.WIN_POS_CENTER)
-		self.popup.set_type_hint(gtk.gdk.DECOR_BORDER)
+		self.popup.set_position(Gtk.WIN_POS_CENTER)
+		self.popup.set_type_hint(Gtk.gdk.DECOR_BORDER)
 		self.popup.set_destroy_with_parent(True)
 		self.popup.set_deletable(True)
-		self.popup.set_icon_name(gtk.STOCK_PREFERENCES)
+		self.popup.set_icon_name(Gtk.STOCK_PREFERENCES)
 		self.popup.connect('delete_event', self.on_popup_close, None)
-		paddingH = gtk.HBox()
+		paddingH = Gtk.HBox()
 		paddingH.show()
-		paddingV = gtk.VBox()
+		paddingV = Gtk.VBox()
 		paddingV.show()
 		self.popup_tab_list.show()
 		paddingH.pack_start(paddingV, True, True, 15)
@@ -299,27 +297,27 @@ class RightPanePluginInstance:
 
 	# Tab line info in popup
 	def add_tab(self, text, img, index):
-		box = gtk.HBox()
+		box = Gtk.HBox()
 		box.set_homogeneous(False)
 		box.show()
 		self.popup_tab_list.pack_start(box, False, True, 5)
 		img = self.clone_image(img)
 		img.show()
 		box.pack_start(img, False, True, 5)
-		label = gtk.Label(text)
+		label = Gtk.Label(text)
 		label.set_alignment(0, 0.5)
 		label.show()
 		box.pack_start(label, True, True, 5)
-		box2 = gtk.HBox()
+		box2 = Gtk.HBox()
 		box2.set_homogeneous(True)
 		box2.show()
 		box.pack_start(box2, False, True, 0)
-		left = gtk.RadioButton(None, label='Left')
+		left = Gtk.RadioButton(None, label='Left')
 		left.show()
 		self.left_radios.append(left)
 		left.connect('toggled', self.on_click_left)
 		box2.pack_start(left, True, True, 5)
-		right = gtk.RadioButton(left, label='Right')
+		right = Gtk.RadioButton(left, label='Right')
 		right.show()
 		if self.right_tab_indexes.count(str(index)) > 0:
 			right.set_active(True)
@@ -385,48 +383,51 @@ class RightPanePluginInstance:
 	# Clone image
 	def clone_image(self, image):
 		storage = image.get_storage_type()
-		if storage == gtk.IMAGE_PIXMAP:
+		if storage == Gtk.IMAGE_PIXMAP:
 			img, mask = image.get_pixmap()
-			return gtk.image_new_from_pixmap(img, mask)
-		if storage == gtk.IMAGE_IMAGE:
+			return Gtk.image_new_from_pixmap(img, mask)
+		if storage == Gtk.IMAGE_IMAGE:
 			img, mask = image.get_image()
-			return gtk.image_new_from_image(img, mask)
-		if storage == gtk.IMAGE_PIXBUF:
-			return gtk.image_new_from_pixbuf(image.get_pixbuf())
-		if storage == gtk.IMAGE_STOCK:
+			return Gtk.image_new_from_image(img, mask)
+		if storage == Gtk.IMAGE_PIXBUF:
+			return Gtk.image_new_from_pixbuf(image.get_pixbuf())
+		if storage == Gtk.IMAGE_STOCK:
 			img, size = image.get_stock()
-			return gtk.image_new_from_stock(img, size)
-		if storage == gtk.IMAGE_ICON_SET:
+			return Gtk.image_new_from_stock(img, size)
+		if storage == Gtk.IMAGE_ICON_SET:
 			img, size = image.get_icon_set()
-			return gtk.image_new_from_icon_set(img, size)
-		if storage == gtk.IMAGE_ANIMATION:
-			return gtk.image_new_from_animation(image.get_animation())
-		if storage == gtk.IMAGE_ICON_NAME:
+			return Gtk.image_new_from_icon_set(img, size)
+		if storage == Gtk.IMAGE_ANIMATION:
+			return Gtk.image_new_from_animation(image.get_animation())
+		if storage == Gtk.IMAGE_ICON_NAME:
 			img, size = image.get_icon_name()
-			return gtk.image_new_from_icon_name(img, size)
-#		if storage == gtk.IMAGE_EMPTY:
-		img = gtk.Image()
-		img.set_from_stock(gtk.STOCK_NEW, gtk.ICON_SIZE_MENU)
+			return Gtk.image_new_from_icon_name(img, size)
+#		if storage == Gtk.IMAGE_EMPTY:
+		img = Gtk.Image()
+		img.set_from_stock(Gtk.STOCK_NEW, Gtk.ICON_SIZE_MENU)
 		return img
 
-class RightPanePlugin(gedit.Plugin):
-	DATA_TAG = "RightPanePluginInstance"
+class RightPanePlugin:
+	__gtype_name__ = "RightPanePluginInstance"
+
+	window = GObject.property(type=Gedit.Window)
 
 	def __init__(self):
-		gedit.Plugin.__init__(self)
+		GObject.Object.__init__(self)
 
-	def _get_instance(self, window):
-		return window.get_data(self.DATA_TAG)
+	def _get_instance(self):
+		return self.window.get_data(self.__gtype_name__)
 
-	def _set_instance(self, window, instance):
-		window.set_data(self.DATA_TAG, instance)
+	def _set_instance(self, instance):
+		self.window.set_data(self.__gtype_name__, instance)
 
-	def activate(self, window):
-		self._set_instance(window, RightPanePluginInstance(self, window))
+	def do_activate(self):
+		self._set_instance(self.window, RightPanePluginInstance(self.window))
 
-	def deactivate(self, window):
-		self._get_instance(window).deactivate()
-		self._set_instance(window, None)
+	def do_deactivate(self, window):
+		self._get_instance(self.window).do_deactivate()
+		self._set_instance(self.window, None)
 
-	def update_ui(self, window):
-		self._get_instance(window).update_ui()
+	def do_update_state(self):
+		self._get_instance(self.window).do_update_state()
+
