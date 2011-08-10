@@ -1,8 +1,8 @@
-[Gedit Plugin]
+[Plugin]
 Loader=python
 Module=rightpane
-IAge=2
+IAge=3
 Name=Right Pane
 Description=Display a right pane & manage it
-Authors=Tournier Guillaume
+Authors=Tournier Guillaume <tournier.guillaume@gmail.com>
 Copyright=Copyright © 2009 Tournier Guillaume <tournier.guillaume@gmail.com>
