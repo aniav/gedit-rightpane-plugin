@@ -11,7 +11,7 @@
 # GNU General Public License for more details.
 
 
-from gi.repository import GObject, Gtk, Gedit
+from gi.repository import GObject, Gtk, Gedit, Gdk
 import os, os.path, ConfigParser
 
 ui_str="""<ui>
@@ -274,10 +274,10 @@ class RightPanePluginInstance:
 
 	# Build popup elements
 	def build_popup(self):
-		self.popup = Gtk.Window(type=Gtk.WINDOW_TOPLEVEL)
+		self.popup = Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
 		self.popup.set_title("Left-Right Pane Manager (Ctrl+F10)")
-		self.popup.set_position(Gtk.WIN_POS_CENTER)
-		self.popup.set_type_hint(Gtk.gdk.DECOR_BORDER)
+		self.popup.set_position(Gtk.WindowPosition.CENTER)
+		self.popup.set_type_hint(Gdk.WindowTypeHint.NORMAL)
 		self.popup.set_destroy_with_parent(True)
 		self.popup.set_deletable(True)
 		self.popup.set_icon_name(Gtk.STOCK_PREFERENCES)
@@ -312,12 +312,13 @@ class RightPanePluginInstance:
 		box2.set_homogeneous(True)
 		box2.show()
 		box.pack_start(box2, False, True, 0)
-		left = Gtk.RadioButton(None, label='Left')
+		left = Gtk.RadioButton(label='Left')
 		left.show()
 		self.left_radios.append(left)
 		left.connect('toggled', self.on_click_left)
 		box2.pack_start(left, True, True, 5)
-		right = Gtk.RadioButton(left, label='Right')
+		right = Gtk.RadioButton(#left,
+			label='Right')
 		right.show()
 		if self.right_tab_indexes.count(str(index)) > 0:
 			right.set_active(True)
@@ -383,29 +384,20 @@ class RightPanePluginInstance:
 	# Clone image
 	def clone_image(self, image):
 		storage = image.get_storage_type()
-		if storage == Gtk.IMAGE_PIXMAP:
-			img, mask = image.get_pixmap()
-			return Gtk.image_new_from_pixmap(img, mask)
-		if storage == Gtk.IMAGE_IMAGE:
-			img, mask = image.get_image()
-			return Gtk.image_new_from_image(img, mask)
-		if storage == Gtk.IMAGE_PIXBUF:
-			return Gtk.image_new_from_pixbuf(image.get_pixbuf())
-		if storage == Gtk.IMAGE_STOCK:
+		if storage == Gtk.ImageType.PIXBUF:
+			return Gtk.Image.new_from_pixbuf(image.get_pixbuf())
+		if storage == Gtk.ImageType.STOCK:
 			img, size = image.get_stock()
-			return Gtk.image_new_from_stock(img, size)
-		if storage == Gtk.IMAGE_ICON_SET:
+			return Gtk.Image.new_from_stock(img, size)
+		if storage == Gtk.ImageType.ICON_SET:
 			img, size = image.get_icon_set()
-			return Gtk.image_new_from_icon_set(img, size)
-		if storage == Gtk.IMAGE_ANIMATION:
-			return Gtk.image_new_from_animation(image.get_animation())
-		if storage == Gtk.IMAGE_ICON_NAME:
+			return Gtk.Image.new_from_icon_set(img, size)
+		if storage == Gtk.ImageType.ANIMATION:
+			return Gtk.Image.new_from_animation(image.get_animation())
+		if storage == Gtk.ImageType.ICON_NAME:
 			img, size = image.get_icon_name()
-			return Gtk.image_new_from_icon_name(img, size)
-#		if storage == Gtk.IMAGE_EMPTY:
-		img = Gtk.Image()
-		img.set_from_stock(Gtk.STOCK_NEW, Gtk.ICON_SIZE_MENU)
-		return img
+			return Gtk.Image.new_from_icon_name(img, size)
+		return Gtk.Image().set_from_stock(Gtk.STOCK_NEW, Gtk.IconSize.MENU)
 
 class RightPanePlugin(GObject.Object, Gedit.WindowActivatable):
 	__gtype_name__ = "RightPanePluginInstance"
