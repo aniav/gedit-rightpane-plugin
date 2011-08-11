@@ -407,7 +407,7 @@ class RightPanePluginInstance:
 		img.set_from_stock(Gtk.STOCK_NEW, Gtk.ICON_SIZE_MENU)
 		return img
 
-class RightPanePlugin:
+class RightPanePlugin(GObject.Object, Gedit.WindowActivatable):
 	__gtype_name__ = "RightPanePluginInstance"
 
 	window = GObject.property(type=Gedit.Window)
@@ -422,12 +422,12 @@ class RightPanePlugin:
 		self.window.set_data(self.__gtype_name__, instance)
 
 	def do_activate(self):
-		self._set_instance(self.window, RightPanePluginInstance(self.window))
+		self._set_instance(RightPanePluginInstance(self.window))
 
-	def do_deactivate(self, window):
-		self._get_instance(self.window).do_deactivate()
-		self._set_instance(self.window, None)
+	def do_deactivate(self):
+		self._get_instance().do_deactivate()
+		self._set_instance(None)
 
 	def do_update_state(self):
-		self._get_instance(self.window).do_update_state()
+		self._get_instance().do_update_state()
 
