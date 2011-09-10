@@ -13,6 +13,7 @@
 import os
 import os.path
 import ConfigParser
+
 from gi.repository import GObject, Gtk, Gedit
 
 ui_str="""<ui>
