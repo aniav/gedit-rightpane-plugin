@@ -10,8 +10,10 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
+import os
+import os.path
+import ConfigParser
 from gi.repository import GObject, Gtk, Gedit
-import os, os.path, ConfigParser
 
 ui_str="""<ui>
 <menubar name="MenuBar">
@@ -99,7 +101,8 @@ class RightPanePluginInstance:
         """
         if self.lock:
             return
-        activated_item = self.get_activated_item(self.left_pane, self.left_notebook)
+        activated_item = self.get_activated_item(self.left_pane,
+                                                 self.left_notebook)
         self.left_pane.activate_item(page)
         img = self.clone_image(self.left_pane.get_children()[0].get_children()[0].get_children()[0])
         if activated_item:
@@ -135,7 +138,8 @@ class RightPanePluginInstance:
         """
         Save tab infos
         """
-        activated_item = self.get_activated_item(self.left_pane, self.left_notebook)
+        activated_item = self.get_activated_item(self.left_pane,
+                                                 self.left_notebook)
         for child in self.left_notebook.get_children():
             self.left_pane.activate_item(child)
             img = self.clone_image(self.left_pane.get_children()[0].get_children()[0].get_children()[0])
@@ -162,10 +166,13 @@ class RightPanePluginInstance:
         for i in range(length):
             index = length - i - 1
             if self.load.count(self.labels[index]) > 0:
-                self.transfer_tab(self.left_pane, self.right_pane, self.items[index])
-                self.config.set('right_pane', 'tab' + str(index), self.labels[index])
+                self.transfer_tab(self.left_pane, self.right_pane,
+                                  self.items[index])
+                self.config.set('right_pane', 'tab' + str(index),
+                                self.labels[index])
                 self.right_tab_indexes.append(str(index))
-                self.config.set('right_pane', 'tabs', ','.join(self.right_tab_indexes))
+                self.config.set('right_pane', 'tabs',
+                                ','.join(self.right_tab_indexes))
                 if self.config.has_option('right_pane', 'tab-active') \
                     and self.config.get('right_pane', 'tab-active') == self.labels[index]:
                     self.right_pane.activate_item(self.items[index])
@@ -212,7 +219,8 @@ class RightPanePluginInstance:
         for str_index in self.right_tab_indexes:
             try:
                 index = int(str_index)
-                self.transfer_tab(self.right_pane, self.left_pane, self.items[index])
+                self.transfer_tab(self.right_pane, self.left_pane,
+                                  self.items[index])
             except IndexError:
                 True
         self.new_hpaned.remove(self.old_hpaned)
@@ -473,6 +481,7 @@ class RightPanePluginInstance:
             img, size = image.get_icon_name()
             return Gtk.Image.new_from_icon_name(img, size)
         return Gtk.Image().set_from_stock(Gtk.STOCK_NEW, Gtk.IconSize.MENU)
+
 
 class RightPanePlugin(GObject.Object, Gedit.WindowActivatable):
     __gtype_name__ = "RightPanePluginInstance"
